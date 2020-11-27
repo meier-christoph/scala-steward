@@ -23,6 +23,7 @@ import org.http4s.Uri.UserInfo
 import org.http4s.syntax.literals._
 import org.scalasteward.core.application.Cli.EnvVar
 import org.scalasteward.core.application.Config.{ProcessCfg, ScalafixCfg}
+import org.scalasteward.core.data.Resolver
 import org.scalasteward.core.git.Author
 import org.scalasteward.core.util
 import org.scalasteward.core.vcs.data.AuthenticatedUser
@@ -73,7 +74,8 @@ final case class Config(
     bitbucketServerUseDefaultReviewers: Boolean,
     gitlabMergeWhenPipelineSucceeds: Boolean,
     githubTopicForRepos: Option[String],
-    selfCheckUri: Uri
+    selfCheckUri: Uri,
+    defaultResolver: Resolver
 ) {
   def vcsUser[F[_]](implicit F: Sync[F]): F[AuthenticatedUser] = {
     val urlWithUser = util.uri.withUserInfo.set(UserInfo(vcsLogin, None))(vcsApiHost).renderString
@@ -134,6 +136,9 @@ object Config {
       bitbucketServerUseDefaultReviewers = args.bitbucketServerUseDefaultReviewers,
       gitlabMergeWhenPipelineSucceeds = args.gitlabMergeWhenPipelineSucceeds,
       githubTopicForRepos = args.githubTopicForRepos,
-      selfCheckUri = args.selfCheckUri.getOrElse(uri"https://github.com")
+      selfCheckUri = args.selfCheckUri.getOrElse(uri"https://github.com"),
+      defaultResolver = args.defaultMavenRepo
+        .map(url => Resolver.MavenRepository("default", url, None))
+        .getOrElse(Resolver.mavenCentral)
     )
 }

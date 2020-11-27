@@ -94,7 +94,7 @@ object Context {
       implicit val mavenAlg: MavenAlg[F] = MavenAlg.create[F](config)
       implicit val sbtAlg: SbtAlg[F] = SbtAlg.create[F](config)
       implicit val millAlg: MillAlg[F] = MillAlg.create[F]
-      implicit val buildToolDispatcher: BuildToolDispatcher[F] = BuildToolDispatcher.create[F]
+      implicit val buildToolDispatcher: BuildToolDispatcher[F] = BuildToolDispatcher.create(config)
       implicit val refreshErrorAlg: RefreshErrorAlg[F] =
         new RefreshErrorAlg[F](new JsonKeyValueStore("refresh_error", "1", kvsPrefix))
       implicit val repoCacheAlg: RepoCacheAlg[F] = new RepoCacheAlg[F](config)

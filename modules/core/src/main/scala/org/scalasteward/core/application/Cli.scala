@@ -24,6 +24,7 @@ import cats.syntax.all._
 import org.http4s.Uri
 import org.http4s.syntax.literals._
 import org.scalasteward.core.util.dateTime.parseFiniteDuration
+
 import scala.concurrent.duration._
 
 object Cli {
@@ -53,7 +54,8 @@ object Cli {
       bitbucketServerUseDefaultReviewers: Boolean = false,
       gitlabMergeWhenPipelineSucceeds: Boolean = false,
       githubTopicForRepos: Option[String] = None,
-      selfCheckUri: Option[Uri] = None
+      selfCheckUri: Option[Uri] = None,
+      defaultMavenRepo: Option[String] = None
   )
 
   final case class EnvVar(name: String, value: String)
