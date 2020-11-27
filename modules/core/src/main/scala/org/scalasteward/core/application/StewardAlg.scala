@@ -68,7 +68,8 @@ final class StewardAlg[F[_]]()(implicit
         _ <- selfCheckAlg.checkAll
         _ <- workspaceAlg.cleanWorkspace
         exitCode <- sbtAlg.addGlobalPlugins {
-          repoSourceAlg.fetchRepos()
+          repoSourceAlg
+            .fetchRepos()
             .evalMap(steward)
             .compile
             .foldMonoid
