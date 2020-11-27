@@ -18,12 +18,11 @@ package org.scalasteward.core.application
 
 import cats.syntax.all._
 import io.chrisdavenport.log4cats.Logger
-import org.http4s.Uri
 import org.scalasteward.core.git.GitAlg
 import org.scalasteward.core.scalafmt.ScalafmtAlg
 import org.scalasteward.core.util.{HttpExistenceClient, MonadThrow}
 
-final class SelfCheckAlg[F[_]](implicit
+final class SelfCheckAlg[F[_]](config: Config)(implicit
     gitAlg: GitAlg[F],
     httpExistenceClient: HttpExistenceClient[F],
     logger: Logger[F],
@@ -52,8 +51,8 @@ final class SelfCheckAlg[F[_]](implicit
 
   private def checkHttpExistenceClient: F[Unit] =
     for {
-      url <- F.fromEither(Uri.fromString("https://github.com"))
-      res <- httpExistenceClient.exists(url)
+      res <- httpExistenceClient.exists(config.selfCheckUri)
+      url = config.selfCheckUri
       msg = s"Self check of HttpExistenceClient failed: checking that $url exists failed"
       _ <- if (!res) logger.warn(msg) else F.unit
     } yield ()

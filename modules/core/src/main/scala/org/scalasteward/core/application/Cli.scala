@@ -52,7 +52,8 @@ object Cli {
       cacheTtl: FiniteDuration = 2.hours,
       bitbucketServerUseDefaultReviewers: Boolean = false,
       gitlabMergeWhenPipelineSucceeds: Boolean = false,
-      githubTopicForRepos: Option[String] = None
+      githubTopicForRepos: Option[String] = None,
+      selfCheckUri: Option[Uri] = None
   )
 
   final case class EnvVar(name: String, value: String)

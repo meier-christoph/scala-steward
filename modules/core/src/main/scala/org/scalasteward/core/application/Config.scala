@@ -20,11 +20,13 @@ import better.files.File
 import cats.effect.Sync
 import org.http4s.Uri
 import org.http4s.Uri.UserInfo
+import org.http4s.syntax.literals._
 import org.scalasteward.core.application.Cli.EnvVar
 import org.scalasteward.core.application.Config.{ProcessCfg, ScalafixCfg}
 import org.scalasteward.core.git.Author
 import org.scalasteward.core.util
 import org.scalasteward.core.vcs.data.AuthenticatedUser
+
 import scala.concurrent.duration.FiniteDuration
 import scala.sys.process.Process
 
@@ -70,7 +72,8 @@ final case class Config(
     cacheTtl: FiniteDuration,
     bitbucketServerUseDefaultReviewers: Boolean,
     gitlabMergeWhenPipelineSucceeds: Boolean,
-    githubTopicForRepos: Option[String]
+    githubTopicForRepos: Option[String],
+    selfCheckUri: Uri
 ) {
   def vcsUser[F[_]](implicit F: Sync[F]): F[AuthenticatedUser] = {
     val urlWithUser = util.uri.withUserInfo.set(UserInfo(vcsLogin, None))(vcsApiHost).renderString
@@ -130,6 +133,7 @@ object Config {
       cacheTtl = args.cacheTtl,
       bitbucketServerUseDefaultReviewers = args.bitbucketServerUseDefaultReviewers,
       gitlabMergeWhenPipelineSucceeds = args.gitlabMergeWhenPipelineSucceeds,
-      githubTopicForRepos = args.githubTopicForRepos
+      githubTopicForRepos = args.githubTopicForRepos,
+      selfCheckUri = args.selfCheckUri.getOrElse(uri"https://github.com")
     )
 }
