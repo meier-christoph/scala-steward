@@ -69,7 +69,8 @@ final case class Config(
     artifactMigrations: Option[File],
     cacheTtl: FiniteDuration,
     bitbucketServerUseDefaultReviewers: Boolean,
-    gitlabMergeWhenPipelineSucceeds: Boolean
+    gitlabMergeWhenPipelineSucceeds: Boolean,
+    githubTopicForRepos: Option[String]
 ) {
   def vcsUser[F[_]](implicit F: Sync[F]): F[AuthenticatedUser] = {
     val urlWithUser = util.uri.withUserInfo.set(UserInfo(vcsLogin, None))(vcsApiHost).renderString
@@ -128,6 +129,7 @@ object Config {
       artifactMigrations = args.artifactMigrations,
       cacheTtl = args.cacheTtl,
       bitbucketServerUseDefaultReviewers = args.bitbucketServerUseDefaultReviewers,
-      gitlabMergeWhenPipelineSucceeds = args.gitlabMergeWhenPipelineSucceeds
+      gitlabMergeWhenPipelineSucceeds = args.gitlabMergeWhenPipelineSucceeds,
+      githubTopicForRepos = args.githubTopicForRepos
     )
 }

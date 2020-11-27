@@ -36,6 +36,11 @@ import org.scalasteward.core.nurture.{NurtureAlg, PullRequestRepository}
 import org.scalasteward.core.persistence.JsonKeyValueStore
 import org.scalasteward.core.repocache.{RefreshErrorAlg, RepoCacheAlg, RepoCacheRepository}
 import org.scalasteward.core.repoconfig.RepoConfigAlg
+import org.scalasteward.core.reposource.{
+  GitHubTopicRepoSourceAlg,
+  MarkdownFileRepoSourceAlg,
+  RepoSourceAlg
+}
 import org.scalasteward.core.scalafix.{MigrationAlg, MigrationsLoader}
 import org.scalasteward.core.scalafmt.ScalafmtAlg
 import org.scalasteward.core.update.{ArtifactMigrations, FilterAlg, PruningAlg, UpdateAlg}
@@ -96,7 +101,11 @@ object Context {
       implicit val editAlg: EditAlg[F] = new EditAlg[F]
       implicit val nurtureAlg: NurtureAlg[F] = new NurtureAlg[F](config)
       implicit val pruningAlg: PruningAlg[F] = new PruningAlg[F]
-      new StewardAlg[F](config)
+      implicit val repoSourceAlg: RepoSourceAlg[F] = config.githubTopicForRepos match {
+        case Some(_) => new GitHubTopicRepoSourceAlg[F](config, user)
+        case None    => new MarkdownFileRepoSourceAlg[F](config)
+      }
+      new StewardAlg[F]()
     }
 
   private def printBanner[F[_]](implicit logger: Logger[F]): F[Unit] = {

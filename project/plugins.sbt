@@ -14,3 +14,8 @@ addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.13")
 
 // This is only here so that Scala Steward updates the version in sbt/package.scala too.
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.23")
+
+// workaround for sbt-doctest throwing java.lang.NoClassDefFoundError: org/apache/commons/io/FilenameUtils
+libraryDependencies ++= Seq(
+  "commons-io" % "commons-io" % "2.8.0"
+)

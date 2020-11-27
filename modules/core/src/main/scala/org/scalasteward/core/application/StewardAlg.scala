@@ -16,25 +16,24 @@
 
 package org.scalasteward.core.application
 
-import better.files.File
 import cats.effect.ExitCode
 import cats.syntax.all._
 import fs2.Stream
 import io.chrisdavenport.log4cats.Logger
 import org.scalasteward.core.buildtool.sbt.SbtAlg
 import org.scalasteward.core.git.GitAlg
-import org.scalasteward.core.io.{FileAlg, WorkspaceAlg}
+import org.scalasteward.core.io.WorkspaceAlg
 import org.scalasteward.core.nurture.NurtureAlg
 import org.scalasteward.core.repocache.RepoCacheAlg
+import org.scalasteward.core.reposource.RepoSourceAlg
 import org.scalasteward.core.update.PruningAlg
 import org.scalasteward.core.util
 import org.scalasteward.core.util.logger.LoggerOps
 import org.scalasteward.core.util.{BracketThrow, DateTimeAlg}
 import org.scalasteward.core.vcs.data.Repo
 
-final class StewardAlg[F[_]](config: Config)(implicit
+final class StewardAlg[F[_]]()(implicit
     dateTimeAlg: DateTimeAlg[F],
-    fileAlg: FileAlg[F],
     gitAlg: GitAlg[F],
     logger: Logger[F],
     nurtureAlg: NurtureAlg[F],
@@ -44,18 +43,9 @@ final class StewardAlg[F[_]](config: Config)(implicit
     selfCheckAlg: SelfCheckAlg[F],
     streamCompiler: Stream.Compiler[F, F],
     workspaceAlg: WorkspaceAlg[F],
+    repoSourceAlg: RepoSourceAlg[F],
     F: BracketThrow[F]
 ) {
-  private def readRepos(reposFile: File): Stream[F, Repo] =
-    Stream.evals {
-      fileAlg.readFile(reposFile).map { maybeContent =>
-        val regex = """-\s+(.+)/([^/]+)""".r
-        val content = maybeContent.getOrElse("")
-        content.linesIterator.collect { case regex(owner, repo) =>
-          Repo(owner.trim, repo.trim)
-        }.toList
-      }
-    }
 
   private def steward(repo: Repo): F[Either[Throwable, Unit]] = {
     val label = s"Steward ${repo.show}"
@@ -78,7 +68,7 @@ final class StewardAlg[F[_]](config: Config)(implicit
         _ <- selfCheckAlg.checkAll
         _ <- workspaceAlg.cleanWorkspace
         exitCode <- sbtAlg.addGlobalPlugins {
-          readRepos(config.reposFile)
+          repoSourceAlg.fetchRepos()
             .evalMap(steward)
             .compile
             .foldMonoid
