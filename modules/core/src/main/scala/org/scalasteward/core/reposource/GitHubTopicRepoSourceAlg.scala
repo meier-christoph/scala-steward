@@ -51,7 +51,10 @@ class GitHubTopicRepoSourceAlg[F[_]](
 
   private def listRepoUri(page: Int): Uri =
     (config.vcsApiHost / "search" / "repositories")
-      .withQueryParam("q", s"topic:${config.githubTopicForRepos}")
+      .withQueryParam(
+        "q",
+        s"topic:${config.githubTopicForRepos.getOrElse("scala-steward-enabled")}"
+      )
       .withQueryParam("per_page", 100)
       .withQueryParam("page", page)
 }
@@ -59,11 +62,7 @@ object GitHubTopicRepoSourceAlg {
   // prevent IntelliJ from removing the import of uriDecoder
   locally(uriDecoder)
 
-  final case class SearchOut(
-      total_count: Long,
-      incomplete_results: Boolean,
-      items: Vector[SearchRepoOut]
-  )
+  final case class SearchOut(items: Vector[SearchRepoOut])
   object SearchOut {
     implicit val decoder: Decoder[SearchOut] = deriveDecoder
   }
